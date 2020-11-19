@@ -1,0 +1,84 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html"; charset="utf-8">
+	</head>
+
+	<body>
+		Request time: {{ dt }}  
+		<br><br>
+		<table>
+			<thead>
+				{% for column in h.columns %}
+					<td>
+					{{ column.replace('_',' ') }}
+					</td>
+				{% endfor %}
+			</thead>
+				
+			<tbody>
+
+				<!-- !! ALL HOLDINGS -->
+				{% for position in range(h.shape[0])%}
+				<tr>
+					{% for column in h.columns %}
+					<td>
+						{{ h[column][position] }}
+					</td>
+					{% endfor %}
+				</tr>
+				{% endfor %}
+
+				<!-- !! AGGREGATES -->
+				<tr>
+					{% for x in range(h.shape[1]) %}
+					<td>
+						{% if x==0 %} --- {% endif %}
+						{% if h.columns[x]=='pct_change' %}     {{ agg['daily_change'] }} 
+						{% elif h.columns[x]=='cost' %}         {{ agg['total_position_cost'] }}
+						{% elif h.columns[x]=='pos_$' %}        {{ agg['total_position_value'] }}
+						{% elif h.columns[x]=='pos_%' %}        {{ agg['position_pct'] }}
+						{% elif h.columns[x]=='r_$' %}          {{ agg['return_$'] }}
+						{% elif h.columns[x]=='r_%' %}          {{ agg['return_%'] }}
+						{% endif %}
+					</td>
+					{% endfor %}
+				</tr>
+
+				<!-- !! CASH -->
+				<tr>
+					{% for x in range(h.shape[1]) %}
+					<td>                        
+						{% if x==0 %} CASH {% endif %}
+						{% if h.columns[x]=='pos_$' %}      {{ agg['total_buying_power'] }} 
+						{% elif h.columns[x]=='pos_%' %}    {{ agg['cash_pct'] }}
+						{% endif %}
+					</td>
+					{% endfor %}
+				</tr>
+
+				<!-- !! OUTSTANDING -->
+				<tr>
+					{% for x in range(h.shape[1]) %}
+					<td>                        
+						{% if x==0 %} OUTS {% endif %}
+						{% if h.columns[x]=='pos_$' %}       
+						{% elif h.columns[x]=='pos_%' %}    
+						{% endif %}
+					</td>
+					{% endfor %}
+				</tr>
+
+				<!-- !! TOTAL -->
+				<tr>
+					{% for x in range(h.shape[1]) %}
+					<td>                        
+						{% if x==0 %} TOTAL {% endif %}
+						{% if h.columns[x]=='pos_$' %} {{ agg['total_portfolio_value'] }} {% endif %}
+					</td>
+					{% endfor %}
+				</tr>
+				
+			</tbody>
+		</table>   
+	</body>
+</html>
