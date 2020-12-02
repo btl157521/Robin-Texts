@@ -1,11 +1,17 @@
 ''' Launch Application
 '''
 #%% Import packages
+import datetime as dt
 import config as config              # configurables file
 import RH.Reports.RH_functions as rh    # robinhood processes
 import RH.Reports.APP_functions as app  # application processes
 import RH.Process_routes as routes      # routes
-import datetime as dt
+import RH.Log.logger as logger
+
+#%% Start log
+LOGGER = logger.log()              
+LOG = LOGGER.log                    
+LOG.info('Log initialized')
 
 #%% APPLICATION (Launch APP)
 try:
@@ -13,8 +19,8 @@ try:
     start_conn_timer = dt.datetime.now()                    # start connection timer
     rh.app().connect_robinhood()                            # login to RH
     e_client = app.email_server().connect_gmail()                 
-    e_server = app.email_server().connect_smtp()                           
-    print('{now} -- [Initial Connection] Executed process'.format(now=rh.now()))
+    e_server = app.email_server().connect_smtp()           
+    LOG.info('All connections initialized')
 
     # Start forever loop
     while True:
@@ -36,8 +42,8 @@ try:
             rh.connections().connect_robinhood()                    # login to RH
             e_client = app.email_server().connect_gmail()                 
             e_server = app.email_server().connect_smtp() 
-            print('{now} -- [Connection Reset] Executed process'.format(now=rh.now()))
-
+            LOG.info('All connections reset')
+        
         # Read inbox for unread + process
         UNREAD_MSG = app.email_server().get_unread_mail(e_client=e_client, inbox_name='Inbox')
         routes.PROCESS_UNREAD_MSG(
@@ -47,4 +53,12 @@ try:
         )
         
 except KeyboardInterrupt:
-    print('{now} -- [{file_name}] Keyboard Interruption -- Process killed'.format(now=rh.now(), file_name=__file__.split('\\')[-1]))
+    LOG.exception('EXIT -- Keyboard interruption')
+
+except:
+    LOG.exception('EXIT -- !!! FAILURE !!!')
+
+
+# Close log
+LOG.info('Closing log')
+LOGGER.close()
